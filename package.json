@@ -1,8 +1,14 @@
 {
-  "name": "vuex-resource-module",
+  "name": "vuex-resource-modules",
   "version": "0.0.1",
   "description": "A utility to generate RESTful modules for Vuex",
   "main": "src/index.js",
+  "keywords": [
+    "vue",
+    "vuex",
+    "axios",
+    "rest"
+  ],
   "scripts": {
     "test": "NODE_ENV=test node_modules/.bin/jest",
     "tdd": "npm run test -- --watch --notify --verbose"
@@ -10,9 +16,9 @@
   "author": "Clayton Carter",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.0",
-    "vue": "^2.5.13",
-    "vuex": "^3.0.1"
+    "axios": "*",
+    "vue": "*",
+    "vuex": "*"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
