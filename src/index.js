@@ -2,17 +2,31 @@ import DefaultActions from './DefaultActions'
 
 export default class VuexResourceModule {
 
-    constructor (resource, inputModule = {})
+    constructor (resource, inputModule = {}, config = {})
     {
-        let vuexConfig = {
-            resource,
+
+        let defaultConfig = {
+            uriProvider: uriProvider,
+            callbacks: {},
         }
 
-        vuexConfig.uri = '/' + vuexConfig.resource
+        config = Object.assign({}, defaultConfig, config)
 
-        this.state = Object.assign({vuexConfig}, inputModule.state)
+        config.resource = resource
+        config.baseUri = `${config.prefix ? '/' + config.prefix : ''}/${config.resource}`
+
+        this.state = Object.assign({config}, inputModule.state)
         this.getters = Object.assign({}, inputModule.getters)
         this.mutations = Object.assign({}, inputModule.mutations)
-        this.actions = Object.assign(DefaultActions, inputModule.actions)
+        this.actions = Object.assign({}, DefaultActions, inputModule.actions)
     }
+}
+
+const uriProvider = function (actionName, params, config)
+{
+    if (actionName === 'findAll' || actionName === 'create' || actionName === 'createMany') {
+        return config.baseUri
+    }
+
+    return config.baseUri + '/' + (params.id || params.ids.join(','))
 }

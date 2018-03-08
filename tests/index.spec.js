@@ -6,6 +6,7 @@ Vue.config.productionTip = false
 
 jest.mock('axios')
 
+
 describe('Vuex Resource Module', () => {
 
     it('returns a valid Vuex module', () => {
@@ -16,11 +17,13 @@ describe('Vuex Resource Module', () => {
         expect(module.actions).toBeDefined()
     })
 
-    it('accepts a Vuex module as input', () => {
+
+    it('allows you to provide your own module state', () => {
         let input = {state: { prop: 'value' }}
         let module = new VuexResourceModule('', input)
         expect(module.state.prop).toBe('value')
     })
+
 
     it('returns a module with the resource actions', () => {
         let module = new VuexResourceModule('')
@@ -36,22 +39,74 @@ describe('Vuex Resource Module', () => {
         expect(module.actions.deleteMany).toBeDefined()
     })
 
+
     it('the resource actions return promises', (done) => {
         let module = new VuexResourceModule('')
         let store = new Vuex.Store(module)
 
-        store.dispatch('find').then(args => {
+        store.dispatch('findAll').then(args => {
             expect(true).toBeTruthy()
             done()
         })
     })
 
+
+    it('allows you to provide your own module actions', (done) => {
+        let module = new VuexResourceModule(
+            '',
+            {
+                actions: {
+                    find () {
+                        expect(true).toBeTruthy()
+                        done()
+                    }
+                }
+            })
+        let store = new Vuex.Store(module)
+        store.dispatch('find')
+    })
+
+
     it('builds uris from the resource name', (done) => {
         let module = new VuexResourceModule('resources')
         let store = new Vuex.Store(module)
 
-        store.dispatch('find').then(args => {
-            expect(args.url).toBe('/resources')
+        store.dispatch('find', {id: 1}).then(args => {
+            expect(args.url).toBe('/resources/1')
+            done()
+        })
+    })
+
+
+    it('accepts config', (done) => {
+        let config = {
+            prefix: 'prefix'
+        }
+        let module = new VuexResourceModule('resources', {}, config)
+        let store = new Vuex.Store(module)
+
+        store.dispatch('findAll').then(args => {
+            expect(args.url).toBe('/prefix/resources')
+            done()
+        })
+    })
+
+
+    it('accepts custom callbacks', (done) => {
+        // get single resource
+        // build URI from config and input
+        // calls a custom callback afterward
+        let config = {
+            callbacks: {
+                find: jest.fn()
+            }
+        }
+
+        let module = new VuexResourceModule('resources', {}, config)
+        let store = new Vuex.Store(module)
+
+        store.dispatch('find', {id: 1}).then(args => {
+            expect(config.callbacks.find).toHaveBeenCalled()
             done()
         })
     })
