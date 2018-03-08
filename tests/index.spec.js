@@ -92,7 +92,7 @@ describe('Vuex Resource Module', () => {
     })
 
 
-    fdescribe('callbacks', () => {
+    describe('callbacks', () => {
 
         it('accepts custom callbacks', (done) => {
             let mock = jest.fn()
