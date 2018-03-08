@@ -102,7 +102,7 @@ describe('Vuex Resource Module', () => {
             }
         }
 
-        let module = new VuexResourceModule('resources', {}, config)
+        let module = new VuexResourceModule('', {}, config)
         let store = new Vuex.Store(module)
 
         store.dispatch('find', {id: 1}).then(args => {
@@ -110,5 +110,64 @@ describe('Vuex Resource Module', () => {
             done()
         })
     })
+
+
+    describe('serializers', () => {
+
+        var config = {
+            serializers: {
+                default: jest.fn(),
+                create: jest.fn(),
+                one: jest.fn(),
+            }
+        }
+
+        it('uses default serializer if nothing more specific is defined', (done) => {
+
+            let module = new VuexResourceModule('', {}, config)
+            let store = new Vuex.Store(module)
+
+            store.dispatch('createMany', {prop: 'value'}).then(args => {
+                expect(config.serializers.default).toHaveBeenCalled()
+                expect(config.serializers.one).not.toHaveBeenCalled()
+                expect(config.serializers.create).not.toHaveBeenCalled()
+                done()
+            })
+        })
+
+
+        it('uses action serializer if defined', (done) => {
+
+            jest.resetAllMocks()
+
+            let module = new VuexResourceModule('', {}, config)
+            let store = new Vuex.Store(module)
+
+            store.dispatch('create', {prop: 'value'}).then(args => {
+                expect(config.serializers.create).toHaveBeenCalled()
+                expect(config.serializers.default).not.toHaveBeenCalled()
+                expect(config.serializers.one).not.toHaveBeenCalled()
+                done()
+            })
+        })
+
+
+        it('uses singule/plural serializer if nothing more specific is defined', (done) => {
+
+            jest.resetAllMocks()
+
+            let module = new VuexResourceModule('', {}, config)
+            let store = new Vuex.Store(module)
+
+            store.dispatch('update', {prop: 'value'}).then(args => {
+                expect(config.serializers.one).toHaveBeenCalled()
+                expect(config.serializers.create).not.toHaveBeenCalled()
+                expect(config.serializers.default).not.toHaveBeenCalled()
+                done()
+            })
+        })
+
+    })
+
 
 })

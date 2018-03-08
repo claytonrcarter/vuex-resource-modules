@@ -1,40 +1,45 @@
 import axios from 'axios'
 
-const performActionWithCallback = function (actionName, method, params, config)
+const performActionWithCallback = function (actionConfig, params, moduleConfig)
 {
-    let uri = config.uriProvider(actionName, params, config)
-    let callback = config.callbacks[actionName]
+    let uri = moduleConfig.uriProvider(actionConfig.name, params, moduleConfig)
+    let callback = moduleConfig.callbacks[actionConfig.name]
+    let serialize = moduleConfig.serializers[actionConfig.name] ||
+                    moduleConfig.serializers[actionConfig.single ? 'one' : 'many'] ||
+                    moduleConfig.serializers.default
+    let normalize = moduleConfig.normalizers[actionConfig.name] ||
+                    moduleConfig.normalizers[actionConfig.single ? 'one' : 'many'] ||
+                    moduleConfig.normalizers.default
 
-    delete params.id
-    delete params.ids
+    params = serialize(params)
 
-    let promise = method === 'get' || method === 'delete'
-                  ? axios[method](uri)
-                  : axios[method](uri, params)
+    let promise = actionConfig.method === 'get' || actionConfig.method === 'delete'
+                  ? axios[actionConfig.method](uri)
+                  : axios[actionConfig.method](uri, params)
 
     return callback ? promise.then(callback) : promise
 }
 
 
 const resourceActions = [
-    {action: 'find',       method: 'get'},
-    {action: 'findAll',    method: 'get'},
-    {action: 'findMany',   method: 'get'},
-    {action: 'create',     method: 'post'},
-    {action: 'createMany', method: 'post'},
-    {action: 'update',     method: 'patch'},
-    {action: 'updateMany', method: 'patch'},
-    {action: 'replace',    method: 'put'},
-    {action: 'delete',     method: 'get'},
-    {action: 'deleteMany', method: 'get'},
+    {name: 'find',       method: 'get',   single: true},
+    {name: 'findAll',    method: 'get',   single: false},
+    {name: 'findMany',   method: 'get',   single: false},
+    {name: 'create',     method: 'post',  single: true},
+    {name: 'createMany', method: 'post',  single: false},
+    {name: 'update',     method: 'patch', single: true},
+    {name: 'updateMany', method: 'patch', single: false},
+    {name: 'replace',    method: 'put',   single: true},
+    {name: 'delete',     method: 'get',   single: true},
+    {name: 'deleteMany', method: 'get',   single: false},
 ]
 
 var actions = {}
 
-resourceActions.forEach(val => {
-    actions[val.action] = function (context, params = {})
+resourceActions.forEach(actionConfig => {
+    actions[actionConfig.name] = function (context, params = {})
     {
-        return performActionWithCallback(val.action, val.method, params, context.state.config)
+        return performActionWithCallback(actionConfig, params, context.state.config)
     }
 })
 

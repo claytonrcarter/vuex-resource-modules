@@ -8,6 +8,14 @@ export default class VuexResourceModule {
         let defaultConfig = {
             uriProvider: uriProvider,
             callbacks: {},
+            serializers: {
+                default: data => {
+                    delete data.id
+                    delete data.ids
+                    return data
+                }
+            },
+            normalizers: {}
         }
 
         config = Object.assign({}, defaultConfig, config)
@@ -28,5 +36,6 @@ const uriProvider = function (actionName, params, config)
         return config.baseUri
     }
 
-    return config.baseUri + '/' + (params.id || params.ids.join(','))
+    let ids = params.ids || [params.id]
+    return config.baseUri + '/' + ids.join(',')
 }
