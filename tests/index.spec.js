@@ -92,23 +92,25 @@ describe('Vuex Resource Module', () => {
     })
 
 
-    it('accepts custom callbacks', (done) => {
-        // get single resource
-        // build URI from config and input
-        // calls a custom callback afterward
-        let config = {
-            callbacks: {
-                find: jest.fn()
+    fdescribe('callbacks', () => {
+
+        it('accepts custom callbacks', (done) => {
+            let mock = jest.fn()
+            let config = {
+                callbacks: {
+                    find: () => response => mock()
+                }
             }
-        }
 
-        let module = new VuexResourceModule('', {}, config)
-        let store = new Vuex.Store(module)
+            let module = new VuexResourceModule('', {}, config)
+            let store = new Vuex.Store(module)
 
-        store.dispatch('find', {id: 1}).then(args => {
-            expect(config.callbacks.find).toHaveBeenCalled()
-            done()
+            store.dispatch('find', {id: 1}).then(args => {
+                expect(mock).toHaveBeenCalled()
+                done()
+            })
         })
+
     })
 
 

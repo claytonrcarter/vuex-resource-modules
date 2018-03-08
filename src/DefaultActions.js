@@ -1,7 +1,13 @@
 import axios from 'axios'
 
-const performActionWithCallback = function (actionConfig, params, moduleConfig)
+const getDefaultErrorHandler = function (actionName, resourceName)
 {
+    return error => console.log('Caught error in VuexResourceModule', `${actionName}/${resourceName}`, error)
+}
+
+const performActionWithCallback = function (actionConfig, context, params)
+{
+    let moduleConfig = context.state.config
     let uri = moduleConfig.uriProvider(actionConfig.name, params, moduleConfig)
     let callback = moduleConfig.callbacks[actionConfig.name]
     let serialize = moduleConfig.serializers[actionConfig.name] ||
@@ -13,11 +19,18 @@ const performActionWithCallback = function (actionConfig, params, moduleConfig)
 
     params = serialize(params)
 
+    if (moduleConfig.debug) {
+        console.log(actionConfig.name, moduleConfig.resource, params, uri)
+    }
+
     let promise = actionConfig.method === 'get' || actionConfig.method === 'delete'
-                  ? axios[actionConfig.method](uri)
+                  ? axios[actionConfig.method](uri, { params })
                   : axios[actionConfig.method](uri, params)
 
-    return callback ? promise.then(callback) : promise
+    return callback
+           ? promise.then(callback(context, params))
+                    .catch(getDefaultErrorHandler(actionConfig.name, moduleConfig.resource))
+           : promise
 }
 
 
@@ -39,7 +52,7 @@ var actions = {}
 resourceActions.forEach(actionConfig => {
     actions[actionConfig.name] = function (context, params = {})
     {
-        return performActionWithCallback(actionConfig, params, context.state.config)
+        return performActionWithCallback(actionConfig, context, params)
     }
 })
 
