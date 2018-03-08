@@ -16,54 +16,26 @@ const performActionWithCallback = function (actionName, method, params, config)
 }
 
 
-export default {
-    find (context, params)
-    {
-        return performActionWithCallback('find', 'get', params, context.state.config)
-    },
+const resourceActions = [
+    {action: 'find',       method: 'get'},
+    {action: 'findAll',    method: 'get'},
+    {action: 'findMany',   method: 'get'},
+    {action: 'create',     method: 'post'},
+    {action: 'createMany', method: 'post'},
+    {action: 'update',     method: 'patch'},
+    {action: 'updateMany', method: 'patch'},
+    {action: 'replace',    method: 'put'},
+    {action: 'delete',     method: 'get'},
+    {action: 'deleteMany', method: 'get'},
+]
 
-    findAll (context, params = {})
-    {
-        return performActionWithCallback('findAll', 'get', params, context.state.config)
-    },
+var actions = {}
 
-    findMany (context, params)
+resourceActions.forEach(val => {
+    actions[val.action] = function (context, params = {})
     {
-        return performActionWithCallback('findMany', 'get', params, context.state.config)
-    },
+        return performActionWithCallback(val.action, val.method, params, context.state.config)
+    }
+})
 
-    create (context, params)
-    {
-        return performActionWithCallback('create', 'post', params, context.state.config)
-    },
-
-    createMany (context, params)
-    {
-        return performActionWithCallback('createMany', 'post', params, context.state.config)
-    },
-
-    update (context, params)
-    {
-        return performActionWithCallback('update', 'patch', params, context.state.config)
-    },
-
-    updateMany (context, params)
-    {
-        return performActionWithCallback('updateMany', 'patch', params, context.state.config)
-    },
-
-    replace (context, params)
-    {
-        return performActionWithCallback('replace', 'put', params, context.state.config)
-    },
-
-    delete (context, params)
-    {
-        return performActionWithCallback('delete', 'get', params, context.state.config)
-    },
-
-    deleteMany (context, params)
-    {
-        return performActionWithCallback('deleteMany', 'get', params, context.state.config)
-    },
-}
+export default actions
