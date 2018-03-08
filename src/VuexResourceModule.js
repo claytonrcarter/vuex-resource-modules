@@ -10,9 +10,10 @@ export default class VuexResourceModule {
             callbacks: {},
             serializers: {
                 default: data => {
-                    delete data.id
-                    delete data.ids
-                    return data
+                    let serialized = Object.assign({}, data)
+                    delete serialized.id
+                    delete serialized.ids
+                    return serialized
                 }
             },
             normalizers: {}

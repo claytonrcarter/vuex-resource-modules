@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const getDefaultErrorHandler = function (actionName, resourceName)
 {
-    return error => console.log('Caught error in VuexResourceModule', `${actionName}/${resourceName}`, error)
+    return error => console.log('Caught error in VuexResourceModule', `${resourceName}/${actionName}`, error)
 }
 
 const performActionWithCallback = function (actionConfig, context, params)
@@ -17,15 +17,15 @@ const performActionWithCallback = function (actionConfig, context, params)
                     moduleConfig.normalizers[actionConfig.single ? 'one' : 'many'] ||
                     moduleConfig.normalizers.default
 
-    params = serialize(params)
+    let serializedParams = serialize(params)
 
     if (moduleConfig.debug) {
-        console.log(actionConfig.name, moduleConfig.resource, params, uri)
+        console.log(actionConfig.name, moduleConfig.resource, serializedParams, uri)
     }
 
     let promise = actionConfig.method === 'get' || actionConfig.method === 'delete'
-                  ? axios[actionConfig.method](uri, { params })
-                  : axios[actionConfig.method](uri, params)
+                  ? axios[actionConfig.method](uri, { params: serializedParams })
+                  : axios[actionConfig.method](uri, serializedParams)
 
     return callback
            ? promise.then(callback(context, params))
@@ -43,8 +43,8 @@ const resourceActions = [
     {name: 'update',     method: 'patch', single: true},
     {name: 'updateMany', method: 'patch', single: false},
     {name: 'replace',    method: 'put',   single: true},
-    {name: 'delete',     method: 'get',   single: true},
-    {name: 'deleteMany', method: 'get',   single: false},
+    {name: 'delete',     method: 'delete',   single: true},
+    {name: 'deleteMany', method: 'delete',   single: false},
 ]
 
 var actions = {}
