@@ -5,9 +5,9 @@
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "git@gitlab.com:claytonrcarter/vuex-resource-modules.git"
+    "url": "https://github.com/claytonrcarter/vuex-resource-modules.git"
   },
-  "homepage": "https://gitlab.com/claytonrcarter/vuex-resource-modules",
+  "homepage": "https://github.com/claytonrcarter/vuex-resource-modules",
   "keywords": [
     "vue",
     "vuex",
