@@ -1,4 +1,4 @@
-import createActions from './DefaultActions'
+import createActions from './createActions'
 import pluralize from 'pluralize'
 
 export default class VuexResourceModule {
