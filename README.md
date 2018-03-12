@@ -240,6 +240,22 @@ Allows you to configure how the input parameters are processed before being incl
 In addition to the action serializers, you may also define serializers for `default`, `one` and `many`. If an action serializer is defined (for example: `{serializers: {findAll: data => ...}}`), then it will be used for that action. If there is no action serializer defined, then the appropriate `one` or `many` serializer will be used. (`one` is used for single resource requests: `create`, `update`, etc, while `many` is used for multi-resource requests: `createMany`, `updateMany`, etc). If none of these are defined, the `default` serializer will be used. You may define your own `default` serializer. If you don't, we provide one that simply removes `id` and `ids` from the input parameters.
 
 
+**`only`** (Array of Strings)
+If included, only the specified actions will be defined. For example:
+```js
+// only `widgets/find` and `widgets/delete` will be defined
+new VuexResourceModule('widgets', {}, {only: ['find', 'delete']});
+```
+
+
+**`except`** (Array of Strings)
+If included, all actions except those specified will be defined. For example:
+```js
+// everything except `widgets/find` and `widgets/delete` will be defined
+new VuexResourceModule('widgets', {}, {except: ['find', 'delete']});
+```
+
+
 # Another Example
 This might be a bit long and involved, but provides a more or less real world use case as an example.
 ```js
@@ -309,4 +325,3 @@ export default new VuexResourceModule('widgets', module)
 ## TODO
 * should be able to specify `callbacks` like we can `serializers`, with `default`, `one` and `many`
 * consider adding normalizers, for processing responses before they're handed to the `.then()` callbacks
-* add `only` and `except` config options to select actions to define

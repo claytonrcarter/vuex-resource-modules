@@ -47,13 +47,20 @@ const resourceActions = [
     {name: 'deleteMany', method: 'delete',   single: false},
 ]
 
-var actions = {}
+export default function createActions (config) {
 
-resourceActions.forEach(actionConfig => {
-    actions[actionConfig.name] = function (context, params = {})
-    {
-        return performActionWithCallback(actionConfig, context, params)
-    }
-})
+    var actions = {}
 
-export default actions
+    let actionConfigs = config.only ? resourceActions.filter(actionConfig => config.only.includes(actionConfig.name))
+                      : config.except ? resourceActions.filter(actionConfig => ! config.except.includes(actionConfig.name))
+                      : resourceActions
+
+    actionConfigs.forEach(actionConfig => {
+        actions[actionConfig.name] = function (context, params = {})
+        {
+            return performActionWithCallback(actionConfig, context, params)
+        }
+    })
+
+    return actions
+}

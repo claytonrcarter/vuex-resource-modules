@@ -1,4 +1,4 @@
-import DefaultActions from './DefaultActions'
+import createActions from './DefaultActions'
 import pluralize from 'pluralize'
 
 export default class VuexResourceModule {
@@ -45,7 +45,7 @@ export default class VuexResourceModule {
         this.state = Object.assign({config}, inputModule.state)
         this.getters = Object.assign({}, inputModule.getters)
         this.mutations = Object.assign({}, inputModule.mutations)
-        this.actions = Object.assign({}, DefaultActions, inputModule.actions)
+        this.actions = Object.assign({}, createActions({only: config.only, except: config.except}), inputModule.actions)
         this.modules = inputModule.modules
 
 

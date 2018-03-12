@@ -25,74 +25,97 @@ describe('Vuex Resource Module', () => {
     })
 
 
-    it('returns a module with the resource actions', () => {
-        let module = new VuexResourceModule('')
-        expect(module.actions.find).toBeDefined()
-        expect(module.actions.findAll).toBeDefined()
-        expect(module.actions.findMany).toBeDefined()
-        expect(module.actions.create).toBeDefined()
-        expect(module.actions.createMany).toBeDefined()
-        expect(module.actions.update).toBeDefined()
-        expect(module.actions.updateMany).toBeDefined()
-        expect(module.actions.replace).toBeDefined()
-        expect(module.actions.delete).toBeDefined()
-        expect(module.actions.deleteMany).toBeDefined()
-    })
+    describe('actions', () => {
 
-
-    it('the resource actions return promises', (done) => {
-        let module = new VuexResourceModule('')
-        let store = new Vuex.Store(module)
-
-        store.dispatch('findAll').then(args => {
-            expect(true).toBeTruthy()
-            done()
+        it('returns a module with all the resource actions', () => {
+            let module = new VuexResourceModule('')
+            expect(module.actions.find).toBeDefined()
+            expect(module.actions.findAll).toBeDefined()
+            expect(module.actions.findMany).toBeDefined()
+            expect(module.actions.create).toBeDefined()
+            expect(module.actions.createMany).toBeDefined()
+            expect(module.actions.update).toBeDefined()
+            expect(module.actions.updateMany).toBeDefined()
+            expect(module.actions.replace).toBeDefined()
+            expect(module.actions.delete).toBeDefined()
+            expect(module.actions.deleteMany).toBeDefined()
         })
-    })
 
 
-    it('allows you to provide your own module actions', (done) => {
-        let module = new VuexResourceModule(
-            '',
-            {
-                actions: {
-                    find () {
-                        expect(true).toBeTruthy()
-                        done()
-                    }
-                }
+        it('creates only the actions you specify via `only`', () => {
+            let module = new VuexResourceModule('', {}, {only: ['find', 'delete']})
+
+            expect(module.actions.find).toBeDefined()
+            expect(module.actions.delete).toBeDefined()
+
+            expect(module.actions.findAll).not.toBeDefined()
+            expect(module.actions.updateMany).not.toBeDefined()
+        })
+
+
+        it('doesnt create actions you specify via `except`', () => {
+            let module = new VuexResourceModule('', {}, {except: ['find', 'delete']})
+
+            expect(module.actions.find).not.toBeDefined()
+            expect(module.actions.delete).not.toBeDefined()
+
+            expect(module.actions.findAll).toBeDefined()
+            expect(module.actions.updateMany).toBeDefined()
+        })
+
+
+        it('the resource actions return promises', (done) => {
+            let module = new VuexResourceModule('')
+            let store = new Vuex.Store(module)
+
+            store.dispatch('findAll').then(args => {
+                expect(true).toBeTruthy()
+                done()
             })
-        let store = new Vuex.Store(module)
-        store.dispatch('find')
-    })
-
-
-    it('builds uris from the resource name', (done) => {
-        let module = new VuexResourceModule('resources')
-        let store = new Vuex.Store(module)
-
-        store.dispatch('find', {id: 1}).then(args => {
-            expect(args.url).toBe('/resources/1')
-            done()
         })
-    })
 
 
-    it('accepts config', (done) => {
-        let config = {
-            prefix: 'prefix'
-        }
-        let module = new VuexResourceModule('resources', {}, config)
-        let store = new Vuex.Store(module)
-
-        store.dispatch('findAll').then(args => {
-            expect(args.url).toBe('/prefix/resources')
-            done()
+        it('allows you to provide your own module actions', (done) => {
+            let module = new VuexResourceModule(
+                '',
+                {
+                    actions: {
+                        find () {
+                            expect(true).toBeTruthy()
+                            done()
+                        }
+                    }
+                })
+            let store = new Vuex.Store(module)
+            store.dispatch('find')
         })
+
     })
 
 
     describe('URIs', () => {
+
+        it('builds uris from the resource name', (done) => {
+            let module = new VuexResourceModule('resources')
+            let store = new Vuex.Store(module)
+
+            store.dispatch('find', {id: 1}).then(args => {
+                expect(args.url).toBe('/resources/1')
+                done()
+            })
+        })
+
+
+        it('uses prefixes', (done) => {
+            let config = { prefix: 'prefix' }
+            let module = new VuexResourceModule('resources', {}, config)
+            let store = new Vuex.Store(module)
+
+            store.dispatch('findAll').then(args => {
+                expect(args.url).toBe('/prefix/resources')
+                done()
+            })
+        })
 
         it('can override the default URI provider', (done) => {
             let config = {
