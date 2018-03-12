@@ -51,16 +51,19 @@ store.dispatch('widgets/updateMany', {ids: [1, 2], prop: 'value'})
 ```
 
 `VuexResourceModule` defines the following actions. You can add to or override these as you please.
-* `find` - GET id
-* `findAll` - GET
-* `findMany` - GET ids
-* `create` - POST
-* `createMany` - POST
-* `update` - PATCH id
-* `updateMany` - PATCH ids
-* `replace` - PUT id
-* `delete` - DELETE id
-* `deleteMany` - DELETE ids  
+* `find`
+* `findAll`
+* `findMany`
+* `create`
+* `createMany`
+* `update`
+* `updateMany`
+* `replace`
+* `delete`
+* `deleteMany`
+
+(These are based on the APIs of Ember.Data, JS-Data and Eloquent.)
+
 
 
 ## Installation
@@ -90,7 +93,43 @@ const config = { /* ... */ }
 export default new VuexResourceModule('resource', module, config);
 ```
 
-## Configuration
+
+## Actions
+All actions accepts a single parameter, just like all Vuex actions. (eg `dispatch('find', {id: 1})`) Except where noted, we assume that it will be an object literal whose properties and values are the request parameters and/or data body.
+
+* `find` - GET /widgets/1
+    * required: `{id: (int|string)}`
+    * all other input properties will be passed to axios as query parameters
+* `findAll` - GET /widgets
+    * required: *none*
+    * all input properties will be passed to axios as query parameters
+* `findMany` - GET /widgets/1,2,3 - accepts an object with an array of `ids`
+    * required: `{ids: (array of int|string)}`
+    * all other input properties will be passed to axios as query parameters
+* `create` - POST /widgets - accepts an object with properties and values
+    * required: *none*
+    * all input properties will be passed to axios as request data
+* `createMany` - POST /widgets - accepts an array of objects with properties and values
+    * required: array of Object
+    * all inputs will be passed to axios as request data
+* `update` - PATCH /widgets/1 or /widgets/1,2,3 - accepts an `id`
+    * required: `{id: (int|string)}` or `{ids: (array of int|string)}`
+    * all other input properties will be passed to axios as query parameters
+* `updateMany` - PATCH /widgets
+    * required: array of Object
+    * all inputs will be passed to axios as request data
+* `replace` - PUT /widgets/1
+    * required: `{id: (int|string)}`
+    * all other input properties will be passed to axios as query parameters
+* `delete` - DELETE /widgets/1
+    * required: `{id: (int|string)}`
+    * all other input properties will be passed to axios as query parameters
+* `deleteMany` - DELETE /widgets/1,2,3
+    * required: `{ids: (array of int|string)}`
+    * all other input properties will be passed to axios as query parameters
+
+
+## Use
 The constructor for `VuexResourceModule` takes three arguments:
 * `resource` (String; *required*) - the name of the resource in the URL
 * `module` (Object; *optional*) - a Vuex module definition. All actions defined in this module (if any) will override the defaults from `VuexResourceModule`
@@ -113,16 +152,51 @@ This should be an object suitable for use as a Vuex module, in the format:
 }
 ```
 See the Vuex docs (https://vuex.vuejs.org/en/modules.html) for more info.  
-If you don't specify `namespaced`, we default it to true. We add all of our default REST actions to `actions`, but we won't overwrite any that you provide so that you can override any of them. We also add a `config` property to the `state`. We don't alter `getters` or `mutations`.
+If you don't specify `namespaced`, we default it to true. We add all of our default 
+REST actions to `actions`, but we won't overwrite any that you provide so that you 
+can override any of them. We also add a `config` property to the `state`. We 
+don't alter `getters` or `mutations`.
 
 #### `config`
-This is an object containing configurations that affect how `VuexResourceModule` behaves. You can modify its properties listed below to customize things to suit your needs.
+This is an object containing configurations that affect how `VuexResourceModule` 
+behaves. You can modify its properties listed below to customize things to suit 
+your needs.
+
+
+## Nested Resources
+Any submodules defined in the input Vuex module that are themselves 
+`VuexResourceModule`s will be automatically converted into nested resource 
+modules. A nested resource module will define all of the normal actions but will
+create URIs based off of the primary resource. The input parameters for the 
+actions will use `id` and `ids` to refer to the primary resource, and (eg)
+`subresource_id` and `subresource_ids` to refer to the subresources. For example:
+```js
+let subresources = new VuexResourceModule('subresourcess')
+let resources = new VuexResourceModule('resources', {modules: {subresources}})
+let store = new Vuex.Store(resources)
+
+// GET /resources/1/subresources/2
+store.dispatch('resources/subresources/find', {id: 1, subresource_id: 2})
+```
+
+#### Nested Resource Caveats
+Custom `uriProvider`s w/i nested resource modules might be difficult to get right.
+If you plan to provide a custom `uriProvider` to a nested module, you will have 
+to make careful use of `this` if you want the automatic prefixing to work, and it 
+might be easier to just return the full URI.
+
+
+## Configuration
+The following properties of the `config` object are recognized.
 
 **`prefix`** (String)  
 any URL prefix you may need. For example, `{prefix: 'api/v1'}` would generate URLs like `/api/v1/widgets`
 
 **`uriProvider`** (Function)  
-a function that takes three arguments and returns a URI (as a String)
+A function that takes three arguments and returns a URI (as a String). If nothing
+is matched (the function returns `undefined`), then we will run it through the
+default `uriProvider`. This allows you define your own URIs on an action-by-action
+basis, while still using the defaults.
 * `actionName` (ie, `findAll` or `updateMany`)
 * `params` as passed into the `dispatch()` call
 * `config` (ie this object)
@@ -233,6 +307,6 @@ export default new VuexResourceModule('widgets', module)
 `createMany` and `updateMany` are still a little whacky and need more testing and use.
 
 ## TODO
-* if config.uriProvider doesn't generate a match, run it through the default one
 * should be able to specify `callbacks` like we can `serializers`, with `default`, `one` and `many`
 * consider adding normalizers, for processing responses before they're handed to the `.then()` callbacks
+* add `only` and `except` config options to select actions to define

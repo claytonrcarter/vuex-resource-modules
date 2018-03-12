@@ -6,21 +6,15 @@ export default class VuexResourceModule {
     constructor (resource, inputModule = {}, config = {})
     {
 
+        // setup our defaults
         let defaultConfig = {
+            resource,
             callbacks: {},
             idKey: 'id',
             getIds: (params) => params[pluralize.plural(this.state.config.idKey)] || [params[this.state.config.idKey]],
             getPrefix: (actionName, params, config) => this.state.config.prefix ? '/' + this.state.config.prefix : '',
             getBaseUri: (actionName, params, config) => `${this.state.config.getPrefix(actionName, params, config)}/${this.state.config.resource}`,
-            uriProvider: (actionName, params, config) => {
-                let baseUri = this.state.config.getBaseUri(actionName, params, config)
-
-                if (actionName === 'findAll' || actionName === 'create' || actionName === 'createMany') {
-                    return baseUri
-                }
-
-                return baseUri + '/' + this.state.config.getIds(params).join(',')
-            },
+            uriProvider: this.uriProvider.bind(this), // bind() this to VuexResourceModule, not defaultConfig
             serializers: {
                 default: data => {
                     let serialized = Object.assign({}, data)
@@ -32,10 +26,21 @@ export default class VuexResourceModule {
             normalizers: {}
         }
 
+
+        // wrap any uriProvider so we can fall back to the defaults
+        if (config.uriProvider) {
+            let customProvider = config.uriProvider
+            config.uriProvider =
+                (actionName, params, wrappedConfig) => customProvider(actionName, params, wrappedConfig) ||
+                                                       this.uriProvider(actionName, params, wrappedConfig)
+        }
+
+
+        // build the config, overwriting defaults with anyting provided
         config = Object.assign({}, defaultConfig, config)
 
-        config.resource = resource
 
+        // build the module, including our pieces with anything provided
         this.namespaced = inputModule.namespaced || true
         this.state = Object.assign({config}, inputModule.state)
         this.getters = Object.assign({}, inputModule.getters)
@@ -43,6 +48,8 @@ export default class VuexResourceModule {
         this.actions = Object.assign({}, DefaultActions, inputModule.actions)
         this.modules = inputModule.modules
 
+
+        // setup any nested modules
         if (this.modules) {
             for (let module in this.modules) {
                 module = this.modules[module]
@@ -53,4 +60,17 @@ export default class VuexResourceModule {
             }
         }
     }
+
+
+    uriProvider (actionName, params, config)
+    {
+        let baseUri = this.state.config.getBaseUri(actionName, params, config)
+
+        if (actionName === 'findAll' || actionName === 'create' || actionName === 'createMany') {
+            return baseUri
+        }
+
+        return baseUri + '/' + this.state.config.getIds(params).join(',')
+    }
+
 }

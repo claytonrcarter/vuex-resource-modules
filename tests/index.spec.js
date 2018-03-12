@@ -92,6 +92,47 @@ describe('Vuex Resource Module', () => {
     })
 
 
+    describe('URIs', () => {
+
+        it('can override the default URI provider', (done) => {
+            let config = {
+                uriProvider: (actionName, params, config) => {
+                    if (actionName === 'findAll') {
+                        return 'fake-uri'
+                    }
+                }
+            }
+            let module = new VuexResourceModule('resources', {}, config)
+            let store = new Vuex.Store(module)
+
+            store.dispatch('findAll').then(args => {
+                expect(args.url).toBe('fake-uri')
+                done()
+            })
+        })
+
+
+        it('falls back to default URI provider if no match is returned by custom provider', (done) => {
+            let config = {
+                uriProvider: (actionName, params, config) => {
+                    if (actionName === 'findAll') {
+                        return 'fake-uri'
+                    }
+                }
+            }
+            let module = new VuexResourceModule('resources', {}, config)
+            let store = new Vuex.Store(module)
+
+            store.dispatch('create').then(args => {
+                expect(args.url).not.toBe('fake-uri')
+                expect(args.url).toBe('/resources')
+                done()
+            })
+        })
+
+    })
+
+
     describe('callbacks', () => {
 
         it('accepts custom callbacks', (done) => {
