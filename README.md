@@ -97,34 +97,34 @@ export default new VuexResourceModule('resource', module, config);
 ## Actions
 All actions accepts a single parameter, just like all Vuex actions. (eg `dispatch('find', {id: 1})`) Except where noted, we assume that it will be an object literal whose properties and values are the request parameters and/or data body.
 
-* `find` - GET /widgets/1
+* `find` - GET `/widgets/1`
     * required: `{id: (int|string)}`
     * all other input properties will be passed to axios as query parameters
-* `findAll` - GET /widgets
+* `findAll` - GET `/widgets`
     * required: *none*
     * all input properties will be passed to axios as query parameters
-* `findMany` - GET /widgets/1,2,3 - accepts an object with an array of `ids`
+* `findMany` - GET `/widgets/1,2,3` - accepts an object with an array of `ids`
     * required: `{ids: (array of int|string)}`
     * all other input properties will be passed to axios as query parameters
-* `create` - POST /widgets - accepts an object with properties and values
+* `create` - POST `/widgets` - accepts an object with properties and values
     * required: *none*
     * all input properties will be passed to axios as request data
-* `createMany` - POST /widgets - accepts an array of objects with properties and values
+* `createMany` - POST `/widgets` - accepts an array of objects with properties and values
     * required: array of Object
     * all inputs will be passed to axios as request data
-* `update` - PATCH /widgets/1 or /widgets/1,2,3 - accepts an `id`
+* `update` - PATCH `/widgets/1` or `/widgets/1,2,3` - accepts an `id`
     * required: `{id: (int|string)}` or `{ids: (array of int|string)}`
     * all other input properties will be passed to axios as query parameters
-* `updateMany` - PATCH /widgets
+* `updateMany` - PATCH `/widgets`
     * required: array of Object
     * all inputs will be passed to axios as request data
-* `replace` - PUT /widgets/1
+* `replace` - PUT `/widgets/1`
     * required: `{id: (int|string)}`
     * all other input properties will be passed to axios as query parameters
-* `delete` - DELETE /widgets/1
+* `delete` - DELETE `/widgets/1`
     * required: `{id: (int|string)}`
     * all other input properties will be passed to axios as query parameters
-* `deleteMany` - DELETE /widgets/1,2,3
+* `deleteMany` - DELETE `/widgets/1,2,3`
     * required: `{ids: (array of int|string)}`
     * all other input properties will be passed to axios as query parameters
 
