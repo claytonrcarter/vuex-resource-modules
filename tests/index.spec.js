@@ -172,4 +172,35 @@ describe('Vuex Resource Module', () => {
     })
 
 
+    describe('nested resources', () => {
+
+        it('doest do anything to regular submodules', () => {
+            let resources = new VuexResourceModule('resources', {modules: {submodule: {state: {}}}})
+
+            expect(resources.modules.submodule.state.config).not.toBeDefined()
+            expect(resources.modules.submodule instanceof VuexResourceModule).not.toBeTruthy()
+        })
+
+        it('recognizes nested resources', () => {
+            let subresources = new VuexResourceModule('subresourcess')
+            let resources = new VuexResourceModule('resources', {modules: {subresources}})
+
+            expect(resources.modules.subresources.state.config).toBeDefined()
+            expect(resources.modules.subresources instanceof VuexResourceModule).toBeTruthy()
+        })
+
+        it('creates URIs for nested resources', (done) => {
+            let subresources = new VuexResourceModule('subresources')
+            let resources = new VuexResourceModule('resources', {modules: {subresources}})
+
+            let store = new Vuex.Store(resources)
+            store.dispatch('subresources/find', {id: 1, subresource_id: 2}).then(args => {
+                expect(args.url).toBe('/resources/1/subresources/2')
+                done()
+            })
+        })
+
+    })
+
+
 })
