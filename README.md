@@ -320,8 +320,8 @@ export default new VuexResourceModule('widgets', module)
 ```
 
 ## Caveats
-This is still very much a work in progress
-`createMany` and `updateMany` are still a little whacky and need more testing and use.
+This is still very much a work in progress and should be used at your own risk.
+In particular, `createMany` and `updateMany` still need some testing and usage.
 
 ## TODO
 * should be able to specify `callbacks` like we can `serializers`, with `default`, `one` and `many`
