@@ -13,9 +13,9 @@ const performActionWithCallback = function (actionConfig, context, params)
     let serialize = moduleConfig.serializers[actionConfig.name] ||
                     moduleConfig.serializers[actionConfig.single ? 'one' : 'many'] ||
                     moduleConfig.serializers.default
-    let normalize = moduleConfig.normalizers[actionConfig.name] ||
-                    moduleConfig.normalizers[actionConfig.single ? 'one' : 'many'] ||
-                    moduleConfig.normalizers.default
+    // let normalize = moduleConfig.normalizers[actionConfig.name] ||
+    //                 moduleConfig.normalizers[actionConfig.single ? 'one' : 'many'] ||
+    //                 moduleConfig.normalizers.default
 
     let serializedParams = serialize(params)
 

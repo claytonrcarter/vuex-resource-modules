@@ -320,8 +320,11 @@ export default new VuexResourceModule('widgets', module)
 ```
 
 ## Caveats
+This is still very much a work in progress
 `createMany` and `updateMany` are still a little whacky and need more testing and use.
 
 ## TODO
 * should be able to specify `callbacks` like we can `serializers`, with `default`, `one` and `many`
+* while we're at it, how about specifing error handlers the same way, via a `catch` config objecct
+* change `callbacks` to `then`
 * consider adding normalizers, for processing responses before they're handed to the `.then()` callbacks
