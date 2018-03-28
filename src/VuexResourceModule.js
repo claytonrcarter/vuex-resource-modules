@@ -10,6 +10,7 @@ export default class VuexResourceModule {
         let defaultConfig = {
             resource,
             callbacks: {},
+            catchCallbacks: {},
             idKey: 'id',
             getIds: (params) => params[pluralize.plural(this.state.config.idKey)] || [params[this.state.config.idKey]],
             getPrefix: (actionName, params, config) => this.state.config.prefix ? '/' + this.state.config.prefix : '',

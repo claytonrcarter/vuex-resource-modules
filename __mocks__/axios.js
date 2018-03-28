@@ -1,26 +1,7 @@
 export default {
-    get (url)
-    {
-        return Promise.resolve({url})
-    },
-
-    post (url, params)
-    {
-        return Promise.resolve({url, params})
-    },
-
-    patch (url, params)
-    {
-        return Promise.resolve({url, params})
-    },
-
-    put (url, params)
-    {
-        return Promise.resolve({url, params})
-    },
-
-    delete (url)
-    {
-        return Promise.resolve({url})
-    }
+    get:    jest.fn(url => Promise.resolve({url})),
+    post:   jest.fn((url, params) => Promise.resolve({url, params})),
+    patch:  jest.fn((url, params) => Promise.resolve({url, params})),
+    put:    jest.fn((url, params) => Promise.resolve({url, params})),
+    delete: jest.fn(url => Promise.resolve({url}))
 }

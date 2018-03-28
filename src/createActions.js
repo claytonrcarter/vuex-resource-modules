@@ -16,6 +16,9 @@ const performActionWithCallback = function (actionConfig, context, params)
     // let normalize = moduleConfig.normalizers[actionConfig.name] ||
     //                 moduleConfig.normalizers[actionConfig.single ? 'one' : 'many'] ||
     //                 moduleConfig.normalizers.default
+    let catchCallback = moduleConfig.catchCallbacks[actionConfig.name]
+    let defaultCatchCallback = getDefaultErrorHandler(actionConfig.name, moduleConfig.resource)
+
 
     let serializedParams = serialize(params)
 
@@ -27,10 +30,13 @@ const performActionWithCallback = function (actionConfig, context, params)
                   ? axios[actionConfig.method](uri, { params: serializedParams })
                   : axios[actionConfig.method](uri, serializedParams)
 
-    return callback
-           ? promise.then(callback(context, params))
-                    .catch(getDefaultErrorHandler(actionConfig.name, moduleConfig.resource))
-           : promise
+    return promise.then(callback ? callback(context, params) : response => response)
+                  .catch(catchCallback ? catchCallback(defaultCatchCallback) : defaultCatchCallback)
+
+    // return callback
+    //        ? promise.then(callback(context, params))
+    //                 .catch(catchCallback ? catchCallback() : getDefaultErrorHandler(actionConfig.name, moduleConfig.resource))
+    //        : promise
 }
 
 

@@ -5,9 +5,13 @@ Vue.use(Vuex)
 Vue.config.productionTip = false
 
 jest.mock('axios')
-
+var axios = require('axios')
 
 describe('Vuex Resource Module', () => {
+
+    beforeEach(() => {
+        jest.resetModules()
+    })
 
     it('returns a valid Vuex module', () => {
         let module = new VuexResourceModule('')
@@ -178,15 +182,47 @@ describe('Vuex Resource Module', () => {
     })
 
 
+    describe('error callbacks', () => {
+
+        it('accepts custom error callbacks', (done) => {
+
+            axios.default.get
+                 .mockImplementationOnce(url => Promise.reject(new Error(url)))
+
+            let mock = jest.fn()
+            let config = {
+                catchCallbacks: {
+                    find: (defaultCatchCallback) => error => mock()
+                }
+            }
+
+            let module = new VuexResourceModule('', {}, config)
+            let store = new Vuex.Store(module)
+
+            store.dispatch('find', {id: 1})
+
+            setTimeout(() => {
+                expect(mock).toHaveBeenCalled()
+                done()
+            }, 0)
+        })
+
+    })
+
+
     describe('serializers', () => {
 
-        var config = {
-            serializers: {
-                default: jest.fn(),
-                create: jest.fn(),
-                one: jest.fn(),
+        var config
+
+        beforeEach(() => {
+            config = {
+                serializers: {
+                    default: jest.fn(),
+                    create: jest.fn(),
+                    one: jest.fn(),
+                }
             }
-        }
+        })
 
         it('uses default serializer if nothing more specific is defined', (done) => {
 
@@ -204,7 +240,6 @@ describe('Vuex Resource Module', () => {
 
         it('uses action serializer if defined', (done) => {
 
-            jest.resetAllMocks()
 
             let module = new VuexResourceModule('', {}, config)
             let store = new Vuex.Store(module)
@@ -219,8 +254,6 @@ describe('Vuex Resource Module', () => {
 
 
         it('uses singule/plural serializer if nothing more specific is defined', (done) => {
-
-            jest.resetAllMocks()
 
             let module = new VuexResourceModule('', {}, config)
             let store = new Vuex.Store(module)
@@ -253,15 +286,26 @@ describe('Vuex Resource Module', () => {
             expect(resources.modules.subresources instanceof VuexResourceModule).toBeTruthy()
         })
 
+        it('builds uris from the resource name', (done) => {
+            let module = new VuexResourceModule('resources')
+            let store = new Vuex.Store(module)
+
+            store.dispatch('find', {id: 1}).then(args => {
+                expect(args.url).toBe('/resources/1')
+                done()
+            })
+        })
+
         it('creates URIs for nested resources', (done) => {
             let subresources = new VuexResourceModule('subresources')
             let resources = new VuexResourceModule('resources', {modules: {subresources}})
 
             let store = new Vuex.Store(resources)
-            store.dispatch('subresources/find', {id: 1, subresource_id: 2}).then(args => {
-                expect(args.url).toBe('/resources/1/subresources/2')
-                done()
-            })
+            store.dispatch('subresources/find', {id: 1, subresource_id: 2})
+                 .then(args => {
+                     expect(args.url).toBe('/resources/1/subresources/2')
+                     done()
+                 })
         })
 
     })

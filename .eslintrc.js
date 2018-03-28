@@ -17,7 +17,8 @@ module.exports = {
         "indent": ["warn", 4, { 'ObjectExpression': 'first',
                                  'ArrayExpression': 'first',
                                  'CallExpression': { arguments: 'first'},
-                                 'MemberExpression': 'off'
+                                 'MemberExpression': 'off',
+                                 "ignoredNodes": ["ConditionalExpression"]
                                }],
         "key-spacing": ["error", { "mode": "minimum" }],
         "comma-dangle": ["warn", "only-multiline"],
