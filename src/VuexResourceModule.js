@@ -9,13 +9,21 @@ export default class VuexResourceModule {
         // setup our defaults
         let defaultConfig = {
             resource,
-            callbacks: {},
-            catchCallbacks: {},
+            prefix: undefined,
             idKey: 'id',
             getIds: (params) => params[pluralize.plural(this.state.config.idKey)] || [params[this.state.config.idKey]],
             getPrefix: (actionName, params, config) => this.state.config.prefix ? '/' + this.state.config.prefix : '',
             getBaseUri: (actionName, params, config) => `${this.state.config.getPrefix(actionName, params, config)}/${this.state.config.resource}`,
             uriProvider: this.uriProvider.bind(this), // bind() this to VuexResourceModule, not defaultConfig
+            only: undefined,
+            except: undefined,
+
+            thenCallbacks: {
+                default: (context, params) => response => response
+            },
+            catchCallbacks: {
+                default: (actionName, resourceName, defaultCatchCallback) => error => console.log('Caught error in VuexResourceModule', `${resourceName}/${actionName}`, error)
+            },
             serializers: {
                 default: data => {
                     let serialized = Object.assign({}, data)
@@ -37,8 +45,8 @@ export default class VuexResourceModule {
         }
 
 
-        // build the config, overwriting defaults with anyting provided
-        config = Object.assign({}, defaultConfig, config)
+        // build the config, overwriting defaults with anything provided
+        config = this.mergeConfig(config, defaultConfig)
 
 
         // build the module, including our pieces with anything provided
@@ -60,6 +68,20 @@ export default class VuexResourceModule {
                 }
             }
         }
+    }
+
+
+    mergeConfig (inputConfig, defaultConfig)
+    {
+        let newConfig = {}
+        for (let property in defaultConfig) {
+            newConfig[property] = ! inputConfig.hasOwnProperty(property)
+                                  ? defaultConfig[property]
+                                  : Object.getPrototypeOf(inputConfig[property]) === Object.prototype
+                                  ? Object.assign({}, defaultConfig[property], inputConfig[property])
+                                  : inputConfig[property]
+        }
+        return newConfig
     }
 
 

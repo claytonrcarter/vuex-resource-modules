@@ -1,24 +1,22 @@
 import axios from 'axios'
 
-const getDefaultErrorHandler = function (actionName, resourceName)
+
+function getActionProperty (actionConfig, object)
 {
-    return error => console.log('Caught error in VuexResourceModule', `${resourceName}/${actionName}`, error)
+    return object[actionConfig.name] ||
+           object[actionConfig.single ? 'one' : 'many'] ||
+           object.default
 }
 
-const performActionWithCallback = function (actionConfig, context, params)
+
+function performActionWithCallback (actionConfig, context, params)
 {
     let moduleConfig = context.state.config
     let uri = moduleConfig.uriProvider(actionConfig.name, params, moduleConfig)
-    let callback = moduleConfig.callbacks[actionConfig.name]
-    let serialize = moduleConfig.serializers[actionConfig.name] ||
-                    moduleConfig.serializers[actionConfig.single ? 'one' : 'many'] ||
-                    moduleConfig.serializers.default
-    // let normalize = moduleConfig.normalizers[actionConfig.name] ||
-    //                 moduleConfig.normalizers[actionConfig.single ? 'one' : 'many'] ||
-    //                 moduleConfig.normalizers.default
-    let catchCallback = moduleConfig.catchCallbacks[actionConfig.name]
-    let defaultCatchCallback = getDefaultErrorHandler(actionConfig.name, moduleConfig.resource)
-
+    let thenCallback = getActionProperty(actionConfig, moduleConfig.thenCallbacks)
+    let serialize = getActionProperty(actionConfig, moduleConfig.serializers)
+    let catchCallback = getActionProperty(actionConfig, moduleConfig.catchCallbacks)
+    let defaultCatchCallback = moduleConfig.catchCallbacks.default
 
     let serializedParams = serialize(params)
 
@@ -30,30 +28,28 @@ const performActionWithCallback = function (actionConfig, context, params)
                   ? axios[actionConfig.method](uri, { params: serializedParams })
                   : axios[actionConfig.method](uri, serializedParams)
 
-    return promise.then(callback ? callback(context, params) : response => response)
-                  .catch(catchCallback ? catchCallback(defaultCatchCallback) : defaultCatchCallback)
+    return promise.then(thenCallback(context, params))
+                  .catch(catchCallback(actionConfig.name, moduleConfig.resource, defaultCatchCallback))
 
-    // return callback
-    //        ? promise.then(callback(context, params))
-    //                 .catch(catchCallback ? catchCallback() : getDefaultErrorHandler(actionConfig.name, moduleConfig.resource))
-    //        : promise
 }
 
 
 const resourceActions = [
-    {name: 'find',       method: 'get',   single: true},
-    {name: 'findAll',    method: 'get',   single: false},
-    {name: 'findMany',   method: 'get',   single: false},
-    {name: 'create',     method: 'post',  single: true},
-    {name: 'createMany', method: 'post',  single: false},
-    {name: 'update',     method: 'patch', single: true},
-    {name: 'updateMany', method: 'patch', single: false},
-    {name: 'replace',    method: 'put',   single: true},
-    {name: 'delete',     method: 'delete',   single: true},
-    {name: 'deleteMany', method: 'delete',   single: false},
+    {name: 'find',       method: 'get',     single: true},
+    {name: 'findAll',    method: 'get',     single: false},
+    {name: 'findMany',   method: 'get',     single: false},
+    {name: 'create',     method: 'post',    single: true},
+    {name: 'createMany', method: 'post',    single: false},
+    {name: 'update',     method: 'patch',   single: true},
+    {name: 'updateMany', method: 'patch',   single: false},
+    {name: 'replace',    method: 'put',     single: true},
+    {name: 'delete',     method: 'delete',  single: true},
+    {name: 'deleteMany', method: 'delete',  single: false},
 ]
 
-export default function createActions (config) {
+
+export default function createActions (config)
+{
 
     var actions = {}
 

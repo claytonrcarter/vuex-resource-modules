@@ -165,7 +165,7 @@ describe('Vuex Resource Module', () => {
         it('accepts custom callbacks', (done) => {
             let mock = jest.fn()
             let config = {
-                callbacks: {
+                thenCallbacks: {
                     find: () => response => mock()
                 }
             }

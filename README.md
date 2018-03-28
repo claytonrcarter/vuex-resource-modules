@@ -212,8 +212,8 @@ const uriProvider = function (actionName, params, config)
 }
 ```
 
-**`callbacks`** (Object)  
-Allows you to configure how the responses are processed when axios is done with them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the same arguments as Vuex actions and must return a callback suitable for being passed to `.then()`.  For example:
+**`thenCallbacks`** (Object)  
+Allows you to configure how the responses are processed when axios is done with them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the same arguments as Vuex actions and must return a callback suitable for being passed to `.then()`.  You can also specify `one`, `many` and `default` callbacks (see `serializers` FMI).  For example:
 ```js
 const insertOrUpdateManyWidgetsCallback = (context, params) => {
     return response => {
@@ -221,7 +221,7 @@ const insertOrUpdateManyWidgetsCallback = (context, params) => {
         return response
     }
 }
-const callbacks = {
+const thenCallbacks = {
     findMany: insertOrUpdateManyWidgetsCallback,
     findAll: insertOrUpdateManyWidgetsCallback,
     updateMany: insertOrUpdateManyWidgetsCallback,
@@ -234,6 +234,11 @@ const callbacks = {
     }
 }
 ```
+
+
+**`catchCallbacks`** (Object)  
+Allows you to configure how error responses are processed when axios encounters them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the arguments `actionName`, `resourceName`, `defaultCatchCallback`.  You can also specify `one`, `many` and `default` callbacks (see `serializers` FMI).
+
 
 **`serializers`** (Object)  
 Allows you to configure how the input parameters are processed before being included in the request. This is an object whose property names are action names (ie, `findAll` or `updateMany`) and whose values are functions. Each function receives the input parameters as their only argument and must return an object suitable for being included in the request.  
@@ -324,7 +329,5 @@ This is still very much a work in progress and should be used at your own risk.
 In particular, `createMany` and `updateMany` still need some testing and usage.
 
 ## TODO
-* should be able to specify `callbacks` like we can `serializers`, with `default`, `one` and `many`
-* while we're at it, how about specifing error handlers the same way, via a `catch` config objecct
-* change `callbacks` to `then`
+* the "Another Example" needs to illustrate more config options
 * consider adding normalizers, for processing responses before they're handed to the `.then()` callbacks
