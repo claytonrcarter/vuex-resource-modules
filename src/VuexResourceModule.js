@@ -17,9 +17,14 @@ export default class VuexResourceModule {
             uriProvider: this.uriProvider.bind(this), // bind() this to VuexResourceModule, not defaultConfig
             only: undefined,
             except: undefined,
+            debug: false,
+            useGlobalAxios: false,
 
             thenCallbacks: {
-                default: (context, params) => response => response
+                default: (context, params) => response => {
+                    if (config.debug) console.log('VuexResourceModules', 'using default (noop) thenCallback')
+                    return response
+                }
             },
             catchCallbacks: {
                 default: (actionName, resourceName, defaultCatchCallback) => error => console.log('Caught error in VuexResourceModule', `${resourceName}/${actionName}`, error)
