@@ -16,13 +16,10 @@ function performActionWithCallback (actionConfig, context, params)
     let thenCallback = getActionProperty(actionConfig, moduleConfig.thenCallbacks)
     let serialize = getActionProperty(actionConfig, moduleConfig.serializers)
     let catchCallback = getActionProperty(actionConfig, moduleConfig.catchCallbacks)
-    let defaultCatchCallback = moduleConfig.catchCallbacks.default
 
     let serializedParams = serialize(params)
 
-    if (moduleConfig.debug) {
-        console.log('VuexResourceModule', moduleConfig.resource, actionConfig.name, serializedParams, uri)
-    }
+    if (moduleConfig.debug) console.log('VuexResourceModule', `${moduleConfig.resource}/${actionConfig.name}`, serializedParams, uri)
 
     let _axios = moduleConfig.useGlobalAxios ? window.axios : axios
 
@@ -30,8 +27,8 @@ function performActionWithCallback (actionConfig, context, params)
                   ? _axios[actionConfig.method](uri, { params: serializedParams })
                   : _axios[actionConfig.method](uri, serializedParams)
 
-    return promise.then(thenCallback(context, params))
-                  .catch(catchCallback(actionConfig.name, moduleConfig.resource, defaultCatchCallback))
+    return promise.then(thenCallback(context, params, actionConfig.name, moduleConfig))
+                  .catch(catchCallback(context, params, actionConfig.name, moduleConfig))
 
 }
 

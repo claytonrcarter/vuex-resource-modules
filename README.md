@@ -112,7 +112,7 @@ All actions accepts a single parameter, just like all Vuex actions. (eg `dispatc
 * `createMany` - POST `/widgets` - accepts an array of objects with properties and values
     * required: array of Object
     * all inputs will be passed to axios as request data
-* `update` - PATCH `/widgets/1` or `/widgets/1,2,3` - accepts an `id`
+* `update` - PATCH `/widgets/1` or `/widgets/1,2,3` - accepts an `id` or `ids`
     * required: `{id: (int|string)}` or `{ids: (array of int|string)}`
     * all other input properties will be passed to axios as query parameters
 * `updateMany` - PATCH `/widgets`
@@ -213,10 +213,11 @@ const uriProvider = function (actionName, params, config)
 ```
 
 **`thenCallbacks`** (Object)  
-Allows you to configure how the responses are processed when axios is done with them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the same arguments as Vuex actions and must return a callback suitable for being passed to `.then()`.  You can also specify `one`, `many` and `default` callbacks (see `serializers` FMI).  For example:
+Allows you to configure how the responses are processed when axios is done with them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the same arguments as Vuex actions, as well as the name of the action and the VuexResourceModule config, and each function must return a callback suitable for being passed to `.then()`.  You can also specify `one`, `many` and `default` callbacks (see `serializers` FMI).  For example:
 ```js
-const insertOrUpdateManyWidgetsCallback = (context, params) => {
+const insertOrUpdateManyWidgetsCallback = (context, params, actionName, config) => {
     return response => {
+        console.log(`Success in ${config.resource}/${actionName}!`) // => "Success in widgets/updateMany"
         context.commit('insertOrUpdateManyWidgets', response.widgets, {root: true})
         return response
     }
@@ -225,7 +226,7 @@ const thenCallbacks = {
     findMany: insertOrUpdateManyWidgetsCallback,
     findAll: insertOrUpdateManyWidgetsCallback,
     updateMany: insertOrUpdateManyWidgetsCallback,
-    deleteMany: ({commit}, params) => {
+    deleteMany: ({commit}, params, actionName, config) => {
         return response =>
         {
             commit('removeManyWidgets', params.ids, {root: true})
@@ -237,7 +238,17 @@ const thenCallbacks = {
 
 
 **`catchCallbacks`** (Object)  
-Allows you to configure how error responses are processed when axios encounters them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the arguments `actionName`, `resourceName`, `defaultCatchCallback`.  You can also specify `one`, `many` and `default` callbacks (see `serializers` FMI).
+Allows you to configure how error responses are processed when axios encounters them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the same arguments as the `thenCallbacks`, and each function must return a callback suitable for being passed to `.catch()`.  You can also specify `one`, `many` and `default` callbacks (see `serializers` FMI).
+```js
+const thenCallbacks = {
+    update: ({commit}, params, actionName, config) => {
+        return error =>
+        {
+            console.log(`Uh oh! Error in ${config.resource}/${actionName}!`)
+        }
+    }
+}
+```
 
 
 **`serializers`** (Object)  
@@ -259,6 +270,21 @@ If included, all actions except those specified will be defined. For example:
 // everything except `widgets/find` and `widgets/delete` will be defined
 new VuexResourceModule('widgets', {}, {except: ['find', 'delete']});
 ```
+
+
+**`debug`** (Boolean, default: false)  
+Print some debugging statements.
+
+
+**`logErrors`** (Boolean, default: true)  
+Print error messages in the default catchCallback, even if `debug` is `false`
+
+
+**`useGlobalAxios`** (Boolean, default: false)  
+Use `window.axios` instead of importing axios directly from `node_modules`. This is useful
+if you have setup any global axios configuration that you would like to use in 
+this module.
+
 
 
 # Another Example
@@ -326,7 +352,8 @@ export default new VuexResourceModule('widgets', module)
 
 ## Caveats
 This is still very much a work in progress and should be used at your own risk.
-In particular, `createMany` and `updateMany` still need some testing and usage.
+In particular, there is is still some inconsistency with some of the action
+conventions that may be subject to change.
 
 ## TODO
 * the "Another Example" needs to illustrate more config options

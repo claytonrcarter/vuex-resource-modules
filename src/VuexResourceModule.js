@@ -18,16 +18,20 @@ export default class VuexResourceModule {
             only: undefined,
             except: undefined,
             debug: false,
+            logErrors: true,
             useGlobalAxios: false,
 
             thenCallbacks: {
-                default: (context, params) => response => {
-                    if (config.debug) console.log('VuexResourceModules', 'using default (noop) thenCallback')
+                default: (context, params, actionName, moduleConfig) => response => {
+                    if (moduleConfig.debug) console.log('VuexResourceModules', `${moduleConfig.resource}/${actionName}`, 'using default (noop) thenCallback')
                     return response
                 }
             },
             catchCallbacks: {
-                default: (actionName, resourceName, defaultCatchCallback) => error => console.log('Caught error in VuexResourceModule', `${resourceName}/${actionName}`, error)
+                default: (context, params, actionName, moduleConfig) => error => {
+                    if (moduleConfig.debug || moduleConfig.logErrors) console.log('Caught error in VuexResourceModule', `${moduleConfig.resource}/${actionName}`, error)
+                    throw error
+                }
             },
             serializers: {
                 default: data => {
