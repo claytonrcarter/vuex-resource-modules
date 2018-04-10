@@ -5,7 +5,7 @@ Vue.use(Vuex)
 Vue.config.productionTip = false
 
 jest.mock('axios')
-var axios = require('axios')
+var axios = require('axios').default
 
 describe('Vuex Resource Module', () => {
 
@@ -186,7 +186,7 @@ describe('Vuex Resource Module', () => {
 
         it('accepts custom error callbacks', (done) => {
 
-            axios.default.get
+            axios.get
                  .mockImplementationOnce(url => Promise.reject(new Error(url)))
 
             let mock = jest.fn()
@@ -307,6 +307,22 @@ describe('Vuex Resource Module', () => {
                      done()
                  })
         })
+
+        it('removes subresource ids from input params', (done) => {
+
+            let subresources = new VuexResourceModule('subresources')
+            let resources = new VuexResourceModule('resources', {modules: {subresources}})
+
+            let store = new Vuex.Store(resources)
+            store.dispatch('subresources/create', {id: 1, subresource_id: 2, subresourceDataProperty: 'value'})
+                 .then(args => {
+                     expect(args.params.id).not.toBeDefined()
+                     expect(args.params.subresource_id).not.toBeDefined()
+                     expect(args.params.subresourceDataProperty).toBeDefined()
+                     done()
+                 })
+        })
+
 
     })
 

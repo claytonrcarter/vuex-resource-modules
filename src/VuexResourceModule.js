@@ -11,9 +11,9 @@ export default class VuexResourceModule {
             resource,
             prefix: undefined,
             idKey: 'id',
-            getIds: (params) => params[pluralize.plural(this.state.config.idKey)] || [params[this.state.config.idKey]],
-            getPrefix: (actionName, params, config) => this.state.config.prefix ? '/' + this.state.config.prefix : '',
-            getBaseUri: (actionName, params, config) => `${this.state.config.getPrefix(actionName, params, config)}/${this.state.config.resource}`,
+            idProvider: (params) => params[pluralize.plural(this.state.config.idKey)] || [params[this.state.config.idKey]],
+            prefixProvider: (actionName, params, config) => this.state.config.prefix ? '/' + this.state.config.prefix : '',
+            baseUriProvider: (actionName, params, config) => `${this.state.config.prefixProvider(actionName, params, config)}/${this.state.config.resource}`,
             uriProvider: this.uriProvider.bind(this), // bind() this to VuexResourceModule, not defaultConfig
             only: undefined,
             except: undefined,
@@ -72,8 +72,21 @@ export default class VuexResourceModule {
             for (let module in this.modules) {
                 module = this.modules[module]
                 if (module instanceof VuexResourceModule) {
+                    // install a new idKey in the submodule
                     module.state.config.idKey = `${pluralize.singular(module.state.config.resource)}_${module.state.config.idKey}`
-                    module.state.config.getPrefix = this.state.config.uriProvider
+
+                    // install *this* modules uriProvider as the submodule's prefixProvider
+                    module.state.config.prefixProvider = this.state.config.uriProvider
+
+                    // stash the default serializer, then install a new default serializer
+                    // that removes the idKey we just generated (eg `subresource_id`)
+                    module.state.config.serializers._default = module.state.config.serializers.default
+                    module.state.config.serializers.default = (data) => {
+                        let serialized = Object.assign({}, module.state.config.serializers._default(data))
+                        delete serialized[module.state.config.idKey]
+                        delete serialized[module.state.config.idKey + 's']
+                        return serialized
+                    }
                 }
             }
         }
@@ -96,13 +109,13 @@ export default class VuexResourceModule {
 
     uriProvider (actionName, params, config)
     {
-        let baseUri = this.state.config.getBaseUri(actionName, params, config)
+        let baseUri = this.state.config.baseUriProvider(actionName, params, config)
 
         if (actionName === 'findAll' || actionName === 'create' || actionName === 'createMany') {
             return baseUri
         }
 
-        return baseUri + '/' + this.state.config.getIds(params).join(',')
+        return baseUri + '/' + this.state.config.idProvider(params).join(',')
     }
 
 }

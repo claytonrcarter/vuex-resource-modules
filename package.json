@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "test": "NODE_ENV=test node_modules/.bin/jest",
-    "tdd": "npm run test -- --watch --notify --verbose"
+    "tdd": "npm run test -- --watch --notify"
   },
   "author": "Clayton Carter",
   "license": "ISC",
@@ -38,5 +38,7 @@
     "jasmine-core": "^3.1.0",
     "jest": "^22.4.2"
   },
-  "jest": {}
+  "jest": {
+      "verbose": false
+  }
 }

@@ -180,10 +180,13 @@ store.dispatch('resources/subresources/find', {id: 1, subresource_id: 2})
 ```
 
 #### Nested Resource Caveats
-Custom `uriProvider`s w/i nested resource modules might be difficult to get right.
-If you plan to provide a custom `uriProvider` to a nested module, you will have 
-to make careful use of `this` if you want the automatic prefixing to work, and it 
-might be easier to just return the full URI.
+Subresources are inherently less configurable than regular resources. At present,
+`prefix` and `serializers.default` will all be discarded from the subresource
+configuration if they are encountered. (As well as several non-public API items.)
+
+Furthermore, we will use the `uriProvider` of the **base** resource to generate
+the URI prefix for it's subresources. Because of this, be careful how you use
+`this` (if you do) in any custom uriProviders you define.
 
 
 ## Configuration
