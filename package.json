@@ -1,6 +1,6 @@
 {
   "name": "vuex-resource-modules",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A utility to generate RESTful modules for Vuex",
   "main": "src/index.js",
   "repository": {
@@ -39,6 +39,6 @@
     "jest": "^22.4.2"
   },
   "jest": {
-      "verbose": false
+    "verbose": false
   }
 }
