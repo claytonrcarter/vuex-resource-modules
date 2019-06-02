@@ -11,17 +11,23 @@ let you control everything.
 ## Example
 ```javascript
 // widgets.js
-import VuexResourceModule from `vuex-resource-modules`;
 
+// in your "widgets" module, import vuex-resource-modules and then use
+// VuexResourceModule constructor to create a "RESTful" vuex module with
+// actions for `find`, `findAll`, etc.
+import VuexResourceModule from `vuex-resource-modules`;
 export default new VuexResourceModule('widget');
 
 
 // store.js
+
+// these are needed to setup a basic Vuex store
 import Vue from 'vue';
 import Vuex from 'vuex';
-import widgets from './widgets';
 Vue.use(Vuex);
 
+// now import your "widgets" module and add it to the store
+import widgets from './widgets';
 export default new Vuex.Store({
     modules: {
         widgets
@@ -30,27 +36,31 @@ export default new Vuex.Store({
 
 
 // app.js
+
+// import your store (which includes the "widgets" module)
 import store from './store'
 
-// GET /widgets/1
+// The store is ready to go, and you use all of the following actions:
+
+// Send a GET request to /widgets/1
 store.dispatch('widgets/find', {id: 1})
 
-// GET /widgets
+// Or a GET request to /widgets
 store.dispatch('widgets/findAll') 
 
-// GET /widgets/2,3,4
+// This will GET /widgets/2,3,4
 store.dispatch('widgets/findMany', {ids: [2, 3, 4]}) 
 
-// POST /widgets with {prop: 'value'}
+// How about a POST request to /widgets with data: {prop: 'value'}
 store.dispatch('widgets/create', {prop: 'value'}) 
 
-// PATCH /widgets/1,2 with {prop: 'value'}
+// Or a PATCH to /widgets/1,2 with {prop: 'value'}
 store.dispatch('widgets/updateMany', {ids: [1, 2], prop: 'value'}) 
 
 // and there's more!
 ```
 
-`VuexResourceModule` defines the following actions. You can add to or override these as you please.
+`VuexResourceModule` defines the following actions. You can add to or override these as you please. See [Actions](#actions) for more information about each.
 * `find`
 * `findAll`
 * `findMany`
@@ -100,24 +110,35 @@ All actions accepts a single parameter, just like all Vuex actions. (eg `dispatc
 * `find` - GET `/widgets/1`
     * required: `{id: (int|string)}`
     * all other input properties will be passed to axios as query parameters
+    * example: `store.dispatch('widgets/find', {id: 1})`
 * `findAll` - GET `/widgets`
     * required: *none*
     * all input properties will be passed to axios as query parameters
+    * example: `store.dispatch('widgets/findAll')`
 * `findMany` - GET `/widgets/1,2,3` - accepts an object with an array of `ids`
     * required: `{ids: (array of int|string)}`
     * all other input properties will be passed to axios as query parameters
+    * example: `store.dispatch('widgets/findMany', {ids: [2, 3, 4]})`
 * `create` - POST `/widgets` - accepts an object with properties and values
     * required: *none*
     * all input properties will be passed to axios as request data
+    * example: `store.dispatch('widgets/create', {title: '...', content: '...', tags: ['a tag', 'etc']})`
 * `createMany` - POST `/widgets` - accepts an array of objects with properties and values
-    * required: array of Object
+    * required: array of Objects
     * all inputs will be passed to axios as request data
+    * example: `store.dispatch('widgets/createMany', [{...}, {...}, etc...])`
+    * useful if your API can create multiple records at once
 * `update` - PATCH `/widgets/1` or `/widgets/1,2,3` - accepts an `id` or `ids`
     * required: `{id: (int|string)}` or `{ids: (array of int|string)}`
     * all other input properties will be passed to axios as query parameters
+    * example: `store.dispatch('widgets/update', {id: 1, key: 'new value'})`
+    * example: `store.dispatch('widgets/update', {ids: [1, 2], key: 'new value'})`
+    * useful if your API allows you to update a record, or update multiple records with the same data
 * `updateMany` - PATCH `/widgets`
-    * required: array of Object
+    * required: array of Objects
     * all inputs will be passed to axios as request data
+    * example: `store.dispatch('widgets/updateMany', [{id: 1, key: 'new value'}, {id: 2, key: 'a different value'}])`
+    * useful if your API allows you to update multiple records at the same time, each with different data. You would probably have to include an `id` or other identification with each Object
 * `replace` - PUT `/widgets/1`
     * required: `{id: (int|string)}`
     * all other input properties will be passed to axios as query parameters
