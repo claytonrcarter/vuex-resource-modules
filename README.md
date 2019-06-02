@@ -377,7 +377,7 @@ export default new VuexResourceModule('widgets', module)
 ## Caveats
 This is still very much a work in progress and should be used at your own risk.
 In particular, there is is still some inconsistency with some of the action
-conventions that may be subject to change.
+conventions (specifically, `update` and `updateMany`) that may be subject to change. 
 
 ## TODO
 * the "Another Example" needs to illustrate more config options
