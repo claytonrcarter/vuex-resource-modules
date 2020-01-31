@@ -1,66 +1,16 @@
 # VuexResourceModules
 
 A super-simple way to implement REST modules in Vuex. All
-RESTful actions are defined out of the box, all returning axios
-response Promises. 
+conventional REST actions are defined out of the box, all returning axios
+response Promises.
 
 Convention over configuration! If your API is well-behaved, little to no
 configuration is needed. If not, lots of configuration options
 let you control everything.
 
-## Example
-```javascript
-// widgets.js
-
-// in your "widgets" module, import vuex-resource-modules and then use
-// VuexResourceModule constructor to create a "RESTful" vuex module with
-// actions for `find`, `findAll`, etc.
-import VuexResourceModule from `vuex-resource-modules`;
-export default new VuexResourceModule('widget');
-
-
-// store.js
-
-// these are needed to setup a basic Vuex store
-import Vue from 'vue';
-import Vuex from 'vuex';
-Vue.use(Vuex);
-
-// now import your "widgets" module and add it to the store
-import widgets from './widgets';
-export default new Vuex.Store({
-    modules: {
-        widgets
-    }
-});
-
-
-// app.js
-
-// import your store (which includes the "widgets" module)
-import store from './store'
-
-// The store is ready to go, and you use all of the following actions:
-
-// Send a GET request to /widgets/1
-store.dispatch('widgets/find', {id: 1})
-
-// Or a GET request to /widgets
-store.dispatch('widgets/findAll') 
-
-// This will GET /widgets/2,3,4
-store.dispatch('widgets/findMany', {ids: [2, 3, 4]}) 
-
-// How about a POST request to /widgets with data: {prop: 'value'}
-store.dispatch('widgets/create', {prop: 'value'}) 
-
-// Or a PATCH to /widgets/1,2 with {prop: 'value'}
-store.dispatch('widgets/updateMany', {ids: [1, 2], prop: 'value'}) 
-
-// and there's more!
-```
-
-`VuexResourceModule` defines the following actions. You can add to or override these as you please. See [Actions](#actions) for more information about each.
+`VuexResourceModule` defines the following actions. You can add, remove or
+override these as you please. See [Actions](#actions) for more information about
+each.
 * `find`
 * `findAll`
 * `findMany`
@@ -72,9 +22,30 @@ store.dispatch('widgets/updateMany', {ids: [1, 2], prop: 'value'})
 * `delete`
 * `deleteMany`
 
-(These are based on the APIs of Ember.Data, JS-Data and Eloquent.)
+## Example
+```javascript
+const store = new Vuex.Store({
+    modules: {
+        widgets: new VuexResourceModule('widgets')
+    }
+});
 
+store.dispatch('widgets/find', {id: 1})
+store.dispatch('widgets/findAll')
+store.dispatch('widgets/findMany', {ids: [2, 3, 4]})
+store.dispatch('widgets/create', {prop: 'value'})
+store.dispatch('widgets/updateMany', {ids: [1, 2], prop: 'value'})
+// ... and there's more!
+```
 
+## Contents
+* [Installation](#installation)
+* [Actions](#actions)
+* [Usage](#usage)
+* [Nested Resources](#nested-resources)
+* [Configuration](#configuration)
+* [More Examples](#more-examples)
+* [Caveats](#caveats)
 
 ## Installation
 
@@ -105,7 +76,7 @@ export default new VuexResourceModule('resource', module, config);
 
 
 ## Actions
-All actions accepts a single parameter, just like all Vuex actions. (eg `dispatch('find', {id: 1})`) Except where noted, we assume that it will be an object literal whose properties and values are the request parameters and/or data body.
+All actions accepts a single parameter, just like all Vuex actions. (eg `dispatch('find', {id: 1})`) Except where noted, we assume that it will be an object literal whose properties and values are the request parameters and/or data body. (Action names and routes are based on the APIs of Ember.Data, JS-Data and Eloquent.)
 
 * `find` - GET `/widgets/1`
     * required: `{id: (int|string)}`
@@ -150,7 +121,7 @@ All actions accepts a single parameter, just like all Vuex actions. (eg `dispatc
     * all other input properties will be passed to axios as query parameters
 
 
-## Use
+## Usage
 The constructor for `VuexResourceModule` takes three arguments:
 * `resource` (String; *required*) - the name of the resource in the URL
 * `module` (Object; *optional*) - a Vuex module definition. All actions defined in this module (if any) will override the defaults from `VuexResourceModule`
@@ -172,27 +143,27 @@ This should be an object suitable for use as a Vuex module, in the format:
     modules
 }
 ```
-See the Vuex docs (https://vuex.vuejs.org/en/modules.html) for more info.  
-If you don't specify `namespaced`, we default it to true. We add all of our default 
-REST actions to `actions`, but we won't overwrite any that you provide so that you 
-can override any of them. We also add a `config` property to the `state`. We 
+See the Vuex docs (https://vuex.vuejs.org/en/modules.html) for more info.
+If you don't specify `namespaced`, we default it to true. We add all of our default
+REST actions to `actions`, but we won't overwrite any that you provide so that you
+can override any of them. We also add a `config` property to the `state`. We
 don't alter `getters` or `mutations`.
 
 #### `config`
-This is an object containing configurations that affect how `VuexResourceModule` 
-behaves. You can modify its properties listed below to customize things to suit 
+This is an object containing configurations that affect how `VuexResourceModule`
+behaves. You can modify its properties listed below to customize things to suit
 your needs.
 
 
 ## Nested Resources
-Any submodules defined in the input Vuex module that are themselves 
-`VuexResourceModule`s will be automatically converted into nested resource 
+Any submodules defined in the input Vuex module that are themselves
+`VuexResourceModule`s will be automatically converted into nested resource
 modules. A nested resource module will define all of the normal actions but will
-create URIs based off of the primary resource. The input parameters for the 
+create URIs based off of the primary resource. The input parameters for the
 actions will use `id` and `ids` to refer to the primary resource, and (eg)
 `subresource_id` and `subresource_ids` to refer to the subresources. For example:
 ```js
-let subresources = new VuexResourceModule('subresourcess')
+let subresources = new VuexResourceModule('subresources')
 let resources = new VuexResourceModule('resources', {modules: {subresources}})
 let store = new Vuex.Store(resources)
 
@@ -213,10 +184,10 @@ the URI prefix for it's subresources. Because of this, be careful how you use
 ## Configuration
 The following properties of the `config` object are recognized.
 
-**`prefix`** (String)  
+**`prefix`** (String)
 any URL prefix you may need. For example, `{prefix: 'api/v1'}` would generate URLs like `/api/v1/widgets`
 
-**`uriProvider`** (Function)  
+**`uriProvider`** (Function)
 A function that takes three arguments and returns a URI (as a String). If nothing
 is matched (the function returns `undefined`), then we will run it through the
 default `uriProvider`. This allows you define your own URIs on an action-by-action
@@ -236,7 +207,7 @@ const uriProvider = function (actionName, params, config)
 }
 ```
 
-**`thenCallbacks`** (Object)  
+**`thenCallbacks`** (Object)
 Allows you to configure how the responses are processed when axios is done with them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the same arguments as Vuex actions, as well as the name of the action and the VuexResourceModule config, and each function must return a callback suitable for being passed to `.then()`.  You can also specify `one`, `many` and `default` callbacks (see `serializers` FMI).  For example:
 ```js
 const insertOrUpdateManyWidgetsCallback = (context, params, actionName, config) => {
@@ -261,7 +232,7 @@ const thenCallbacks = {
 ```
 
 
-**`catchCallbacks`** (Object)  
+**`catchCallbacks`** (Object)
 Allows you to configure how error responses are processed when axios encounters them. This is an object whose property names are action names (ie, `findAll` or `update`) and whose values are functions. Each function receives the same arguments as the `thenCallbacks`, and each function must return a callback suitable for being passed to `.catch()`.  You can also specify `one`, `many` and `default` callbacks (see `serializers` FMI).
 ```js
 const thenCallbacks = {
@@ -275,12 +246,12 @@ const thenCallbacks = {
 ```
 
 
-**`serializers`** (Object)  
-Allows you to configure how the input parameters are processed before being included in the request. This is an object whose property names are action names (ie, `findAll` or `updateMany`) and whose values are functions. Each function receives the input parameters as their only argument and must return an object suitable for being included in the request.  
+**`serializers`** (Object)
+Allows you to configure how the input parameters are processed before being included in the request. This is an object whose property names are action names (ie, `findAll` or `updateMany`) and whose values are functions. Each function receives the input parameters as their only argument and must return an object suitable for being included in the request.
 In addition to the action serializers, you may also define serializers for `default`, `one` and `many`. If an action serializer is defined (for example: `{serializers: {findAll: data => ...}}`), then it will be used for that action. If there is no action serializer defined, then the appropriate `one` or `many` serializer will be used. (`one` is used for single resource requests: `create`, `update`, etc, while `many` is used for multi-resource requests: `createMany`, `updateMany`, etc). If none of these are defined, the `default` serializer will be used. You may define your own `default` serializer. If you don't, we provide one that simply removes `id` and `ids` from the input parameters.
 
 
-**`only`** (Array of Strings)  
+**`only`** (Array of Strings)
 If included, only the specified actions will be defined. For example:
 ```js
 // only `widgets/find` and `widgets/delete` will be defined
@@ -288,7 +259,7 @@ new VuexResourceModule('widgets', {}, {only: ['find', 'delete']});
 ```
 
 
-**`except`** (Array of Strings)  
+**`except`** (Array of Strings)
 If included, all actions except those specified will be defined. For example:
 ```js
 // everything except `widgets/find` and `widgets/delete` will be defined
@@ -296,22 +267,75 @@ new VuexResourceModule('widgets', {}, {except: ['find', 'delete']});
 ```
 
 
-**`debug`** (Boolean, default: false)  
+**`debug`** (Boolean, default: false)
 Print some debugging statements.
 
 
-**`logErrors`** (Boolean, default: true)  
+**`logErrors`** (Boolean, default: true)
 Print error messages in the default catchCallback, even if `debug` is `false`
 
 
-**`useGlobalAxios`** (Boolean, default: false)  
+**`useGlobalAxios`** (Boolean, default: false)
 Use `window.axios` instead of importing axios directly from `node_modules`. This is useful
-if you have setup any global axios configuration that you would like to use in 
+if you have setup any global axios configuration that you would like to use in
 this module.
 
 
+# More Examples
 
-# Another Example
+## Simple Example
+```javascript
+// widgets.js
+
+// in your "widgets" module, import vuex-resource-modules and then use
+// VuexResourceModule constructor to create a "RESTful" vuex module with
+// actions for `find`, `findAll`, etc.
+import VuexResourceModule from `vuex-resource-modules`;
+export default new VuexResourceModule('widget');
+
+
+// store.js
+
+// these are needed to setup a basic Vuex store
+import Vue from 'vue';
+import Vuex from 'vuex';
+Vue.use(Vuex);
+
+// now import your "widgets" module and add it to the store
+import widgets from './widgets';
+export default new Vuex.Store({
+    modules: {
+        widgets
+    }
+});
+
+
+// app.js
+
+// import your store (which includes the "widgets" module)
+import store from './store'
+
+// The store is ready to go, and you use all of the following actions:
+
+// Send a GET request to /widgets/1
+store.dispatch('widgets/find', {id: 1})
+
+// Or a GET request to /widgets
+store.dispatch('widgets/findAll')
+
+// This will GET /widgets/2,3,4
+store.dispatch('widgets/findMany', {ids: [2, 3, 4]})
+
+// How about a POST request to /widgets with data: {prop: 'value'}
+store.dispatch('widgets/create', {prop: 'value'})
+
+// Or a PATCH to /widgets/1,2 with {prop: 'value'}
+store.dispatch('widgets/updateMany', {ids: [1, 2], prop: 'value'})
+
+// and there's more!
+```
+
+## Example with Custom Actions
 This might be a bit long and involved, but provides a more or less real world use case as an example.
 ```js
 import VuexResourceModule from 'vuex-resource-modules'
@@ -363,22 +387,23 @@ const actions = {
                         commit('setSelectedIds', response.data.widgets.map(p => parseInt(p.id)), { root: true })
                         return response
                     })
-                    
+
     },
 
 }
 
 
-var module = { actions }
+var moduleConfig = { actions }
 
-export default new VuexResourceModule('widgets', module)
+export default new VuexResourceModule('widgets', moduleConfig)
 ```
 
 ## Caveats
 This is still very much a work in progress and should be used at your own risk.
 In particular, there is is still some inconsistency with some of the action
-conventions (specifically, `update` and `updateMany`) that may be subject to change. 
+conventions (specifically, `update` and `updateMany`) that may be subject to change.
 
 ## TODO
-* the "Another Example" needs to illustrate more config options
+* the "Example with Custom Actions" needs to illustrate more config options
 * consider adding normalizers, for processing responses before they're handed to the `.then()` callbacks
+* would love some way to do a debug dump of all actions, routes, methods, etc defined, perhaps via getter? (`store.resource.getters['printActions']`?)
