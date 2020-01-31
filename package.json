@@ -21,26 +21,26 @@
   "author": "Clayton Carter",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.19.2",
     "pluralize": "^7.0.0",
-    "vue": "*",
-    "vuex": "*"
+    "vue": "^2.6.11",
+    "vuex": "^3.1.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
     "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^24.8.0",
+    "babel-jest": "^24.9.0",
     "eslint": "^4.19.1",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^11.0.0",
-    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
-    "jasmine-core": "^3.4.0",
-    "jest": "^24.8.0"
+    "jasmine-core": "^3.5.0",
+    "jest": "^24.9.0"
   },
   "jest": {
     "verbose": false,
