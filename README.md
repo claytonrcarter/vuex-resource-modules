@@ -157,18 +157,20 @@ your needs.
 
 ## Nested Resources
 Any submodules defined in the input Vuex module that are themselves
-`VuexResourceModule`s will be automatically converted into nested resource
+`VuexResourceModule`-s will be automatically converted into nested resource
 modules. A nested resource module will define all of the normal actions but will
 create URIs based off of the primary resource. The input parameters for the
-actions will use `id` and `ids` to refer to the primary resource, and (eg)
-`subresource_id` and `subresource_ids` to refer to the subresources. For example:
+actions will use (eg) `resource_id` and `resource_ids` to refer to the primary
+resource, and `id` and `ids` to refer to the subresources. For example:
 ```js
 let subresources = new VuexResourceModule('subresources')
 let resources = new VuexResourceModule('resources', {modules: {subresources}})
 let store = new Vuex.Store(resources)
 
+// GET /resources/1
+store.dispatch('resources/find', {id: 1})
 // GET /resources/1/subresources/2
-store.dispatch('resources/subresources/find', {id: 1, subresource_id: 2})
+store.dispatch('resources/subresources/find', {resource_id: 1, id: 2})
 ```
 
 #### Nested Resource Caveats
@@ -179,6 +181,11 @@ configuration if they are encountered. (As well as several non-public API items.
 Furthermore, we will use the `uriProvider` of the **base** resource to generate
 the URI prefix for it's subresources. Because of this, be careful how you use
 `this` (if you do) in any custom uriProviders you define.
+
+Finally, we have to extend the behavior of the **base** resource's `idProvider`
+to also consider things like `resource_id` in addition to just `id`, and these
+values are removed from the request parameters by default. This will cause
+problems if you *must* include values like `resource_id` in your request.
 
 
 ## Configuration
