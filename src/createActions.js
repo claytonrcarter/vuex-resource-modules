@@ -36,8 +36,9 @@ function performActionWithCallback(actionConfig, context, params) {
         console.log(
             'VuexResourceModule',
             `${moduleConfig.resource}/${actionConfig.name}`,
+            actionConfig.method.toUpperCase(),
+            uri,
             serializedParams,
-            uri
         )
 
     let _axios = moduleConfig.useGlobalAxios ? window.axios : axios

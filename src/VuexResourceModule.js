@@ -108,12 +108,27 @@ export default class VuexResourceModule {
             for (let module in this.modules) {
                 module = this.modules[module]
                 if (module instanceof VuexResourceModule) {
+
+                    let resourceIdKey = `${pluralize.singular(
+                        this.state.config.resource
+                    )}_${this.state.config.idKey}`
+
                     //
-                    // install a new idKey in the submodule
+                    // stash *this* modules idProvider (as _idProvider), then
+                    // install a new one (again on *this* module, not the
+                    // submodule) that also looks for <resource>_<idKey> as well
+                    // whatever behavior is provided by the default idProvider
                     //
-                    module.state.config.idKey = `${pluralize.singular(
-                        module.state.config.resource
-                    )}_${module.state.config.idKey}`
+                    this.state.config._idProvider = this.state.config.idProvider
+                    this.state.config.idProvider = params => {
+                        let ids = params[pluralize.plural(resourceIdKey)] || [
+                            params[resourceIdKey]
+                        ]
+
+                        return ids.length
+                            ? ids
+                            : this.state.config._idProvider(params)
+                    }
 
                     //
                     // install *this* modules uriProvider as the submodule's prefixProvider
@@ -121,8 +136,9 @@ export default class VuexResourceModule {
                     module.state.config.prefixProvider = this.state.config.uriProvider
 
                     //
-                    // stash the default serializer, then install a new default serializer
-                    // that removes the idKey we just generated (eg `subresource_id`)
+                    // stash the default serializer (as _default), then install
+                    // a new default serializer that removes the idKey we just
+                    // generated (eg `subresource_id`)
                     //
                     module.state.config.serializers._default =
                         module.state.config.serializers.default
@@ -131,8 +147,8 @@ export default class VuexResourceModule {
                             {},
                             module.state.config.serializers._default(data)
                         )
-                        delete serialized[module.state.config.idKey]
-                        delete serialized[module.state.config.idKey + 's']
+                        delete serialized[resourceIdKey]
+                        delete serialized[resourceIdKey + 's']
                         return serialized
                     }
                 }
