@@ -108,7 +108,6 @@ export default class VuexResourceModule {
             for (let module in this.modules) {
                 module = this.modules[module]
                 if (module instanceof VuexResourceModule) {
-
                     let resourceIdKey = `${pluralize.singular(
                         this.state.config.resource
                     )}_${this.state.config.idKey}`
@@ -131,9 +130,20 @@ export default class VuexResourceModule {
                     }
 
                     //
-                    // install *this* modules uriProvider as the submodule's prefixProvider
+                    // install *this* modules uriProvider as the submodule's
+                    // prefixProvider, but override it into "nested" mode
                     //
-                    module.state.config.prefixProvider = this.state.config.uriProvider
+                    module.state.config.prefixProvider = (
+                        actionName,
+                        params,
+                        config
+                    ) =>
+                        this.state.config.uriProvider(
+                            actionName,
+                            params,
+                            config,
+                            true
+                        )
 
                     //
                     // stash the default serializer (as _default), then install
@@ -173,7 +183,7 @@ export default class VuexResourceModule {
         return newConfig
     }
 
-    uriProvider(actionName, params, config) {
+    uriProvider(actionName, params, config, nested = false) {
         let baseUri = this.state.config.baseUriProvider(
             actionName,
             params,
@@ -181,9 +191,10 @@ export default class VuexResourceModule {
         )
 
         if (
-            actionName === 'findAll' ||
+            ! nested &&
+            (actionName === 'findAll' ||
             actionName === 'create' ||
-            actionName === 'createMany'
+            actionName === 'createMany')
         ) {
             return baseUri
         }

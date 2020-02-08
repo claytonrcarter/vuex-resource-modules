@@ -280,19 +280,34 @@ describe('Vuex Resource Module', () => {
             })
         })
 
-        it('creates URIs for nested resources', done => {
-            let subresources = new VuexResourceModule('subresources')
-            let resources = new VuexResourceModule('resources', {
-                modules: { subresources }
+        describe('creating URIs for nested resources', function() {
+            let module
+
+            beforeEach(() => {
+                module = new VuexResourceModule('resources', {
+                    modules: { subresources: new VuexResourceModule('subresources') }
+                })
             })
 
-            let store = new Vuex.Store(resources)
-            store
-                .dispatch('subresources/find', { resource_id: 1, id: 2 })
-                .then(args => {
-                    expect(args.url).toBe('/resources/1/subresources/2')
-                    done()
-                })
+            it('URIs without subresource ids', done => {
+                let store = new Vuex.Store(module)
+                store
+                    .dispatch('subresources/create', { resource_id: 1, id: 2 })
+                    .then(args => {
+                        expect(args.url).toBe('/resources/1/subresources')
+                        done()
+                    })
+            })
+
+            it('URIs with subresource ids', done => {
+                let store = new Vuex.Store(module)
+                store
+                    .dispatch('subresources/find', { resource_id: 1, id: 2 })
+                    .then(args => {
+                        expect(args.url).toBe('/resources/1/subresources/2')
+                        done()
+                    })
+            })
         })
 
         it('removes subresource ids from input params', done => {
