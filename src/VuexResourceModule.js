@@ -122,7 +122,7 @@ export default class VuexResourceModule {
                     this.state.config.idProvider = params => {
                         let ids = params[pluralize.plural(resourceIdKey)] || [
                             params[resourceIdKey]
-                        ]
+                        ].filter(i => i)
 
                         return ids.length
                             ? ids

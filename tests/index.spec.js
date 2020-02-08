@@ -289,6 +289,26 @@ describe('Vuex Resource Module', () => {
                 })
             })
 
+            it('base resource URIs without subresource ids', done => {
+                let store = new Vuex.Store(module)
+                store
+                    .dispatch('create', { id: 1 })
+                    .then(args => {
+                        expect(args.url).toBe('/resources')
+                        done()
+                    })
+            })
+
+            it('base resource URIs with subresource ids', done => {
+                let store = new Vuex.Store(module)
+                store
+                    .dispatch('find', { id: 1 })
+                    .then(args => {
+                        expect(args.url).toBe('/resources/1')
+                        done()
+                    })
+            })
+
             it('URIs without subresource ids', done => {
                 let store = new Vuex.Store(module)
                 store
