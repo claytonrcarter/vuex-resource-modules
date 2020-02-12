@@ -1,6 +1,6 @@
 {
   "name": "vuex-resource-modules",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A utility to generate RESTful modules for Vuex",
   "main": "src/index.js",
   "repository": {
