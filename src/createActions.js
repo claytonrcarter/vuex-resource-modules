@@ -32,14 +32,21 @@ function performActionWithCallback(actionConfig, context, params) {
 
     let serializedParams = serialize(params)
 
-    if (moduleConfig.debug)
-        console.log(
-            'VuexResourceModule',
-            `${moduleConfig.resource}/${actionConfig.name}`,
-            actionConfig.method.toUpperCase(),
-            uri,
-            serializedParams,
+    if (moduleConfig.debug) {
+        console.groupCollapsed(
+            `[VuexResourceModule] ${moduleConfig.resource}/${actionConfig.name}`
         )
+        console.log(`${actionConfig.method.toUpperCase()} ${uri}`)
+        console.log(
+            'input params:',
+            Object.keys(params).length ? params : 'none'
+        )
+        console.log(
+            'request params:',
+            Object.keys(serializedParams).length ? serializedParams : 'none'
+        )
+        console.groupEnd()
+    }
 
     let _axios = moduleConfig.useGlobalAxios ? window.axios : axios
 
